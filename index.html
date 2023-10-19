@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Chat</title>
+</head>
+
+<body>
+  <div id="chat">
+    <p>online:</p>
+    <div id="userList"></div>
+    <input id="usernameInput" placeholder="Username" />
+    <input id="messageInput" placeholder="Send message" />
+    <input type="color" id="colorInput" name="head" value="#e66465" />
+    <ul id="messages"></ul>
+
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const messages = document.getElementById('messages');
+    const messageInput = document.getElementById('messageInput');
+    const usernameInput = document.getElementById('usernameInput');
+    const colotInput = document.getElementById('colorInput');
+    const userList = document.getElementById('userList');
+
+    messageInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        socket.emit('message', messageInput.value);
+        messageInput.value = '';
+      }
+    });
+
+    socket.on('message', (data) => {
+      const messageElement = document.createElement('li');
+      messageElement.style.color = data.color;
+      messageElement.innerText = `${data.username}: ${data.message}`;
+      messages.appendChild(messageElement);
+    });
+
+    socket.on('userList', (userListData) => {
+      userList.innerHTML = '';
+      userListData.forEach((username) => {
+        const userItem = document.createElement('div');
+        userItem.innerText = username;
+        userList.appendChild(userItem);
+      });
+    });
+
+    socket.on('welcome', (message) => {
+      const messageElement = document.createElement('li');
+      messageElement.innerText = message;
+      messages.appendChild(messageElement);
+    });
+
+    socket.on('userJoin', (message) => {
+      const messageElement = document.createElement('li');
+      messageElement.innerText = message;
+      messages.appendChild(messageElement);
+    });
+
+    socket.on('userLeave', (message) => {
+      const messageElement = document.createElement('li');
+      messageElement.innerText = message;
+      messages.appendChild(messageElement);
+    });
+
+    usernameInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        socket.emit('register', usernameInput.value, colotInput.value);
+      }
+    });
+  </script>
+</body>
+
+</html>
